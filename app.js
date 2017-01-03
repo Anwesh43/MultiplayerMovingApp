@@ -9,6 +9,12 @@ var io = socketIO(server)
 
 io.of('game').on('connection',(socket)=>{
     console.log('a client is connected')
+    console.log(socket)
     socket.emit("hello",{msg:"thanks for connection"})
+    socket.on('SEND_GAME_OBJECT',(gameObjectJson)=>{
+        console.log(gameObjectJson)
+        
+    })
+
 }) //Creating a namespace
 server.listen(8000)

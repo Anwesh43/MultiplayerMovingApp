@@ -6,10 +6,17 @@ var otherPlayers = []
 var currentPlayer = {}
 var socket = io('http://localhost:8000/game')
 var colors = ["#4DB6AC", "#F4511E", "#1976D2", "#F9A825", "#7E57C2", "#ef5350", "#76FF03"]
+socket.on('RECEIVE_GAME_OBJECT',(gameObject)=>{
+
+    otherPlayers.push(gameObject)
+})
 function initCurrentPlayer() {
   currentPlayer.sx = 0
   currentPlayer.sy = 0
   currentPlayer.dimen = 0
+  currentPlayer.id = math.random()*100000
+  currentPlayer.w = canvas.width
+  currentPlayer.h = canvas.height
   currentPlayer.x =  Math.floor(Math.random()*canvas.width)
   currentPlayer.y = Math.floor(Math.random()*canvas.height)
   var colorIndex = Math.floor(Math.random()*colors.length)
@@ -66,6 +73,9 @@ function draw() {
     currentPlayer.draw(ctx)
     currentPlayer.move()
     ctx.fill()
+    if(currentPlayer.sx != 0 || currentPlayer.sy!=0) {
+       socket.emit('SEND_GAME_OBJECT',currentPlayer)
+    }
     otherPlayers.forEach((currentPlayer)=>{
       ctx.fillStyle = currentPlayer.color
       ctx.beginPath()
