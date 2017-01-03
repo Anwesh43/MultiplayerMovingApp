@@ -6,6 +6,32 @@ var otherPlayers = {}
 var currentPlayer = {}
 var socket = io('http://localhost:8000/game')
 var colors = ["#4DB6AC", "#F4511E", "#1976D2", "#F9A825", "#7E57C2", "#ef5350", "#76FF03"]
+function TapHandler() {
+  this.count = 0
+  this.isShown = false
+  this.x = 0
+  this.y = 0
+}
+TapHandler.prototype.tap = function(x,y) {
+   this.isShown = true
+   this.count = 0
+   this.x = x
+   this.y = y
+}
+TapHandler.prototype.draw = function(ctx) {
+  if(this.isShown) {
+      ctx.fillStyle = "#FFAB40"
+      ctx.opacity = 0.3
+      ctx.beginPath()
+      ctx.arc(this.x,this.y,10,0,2*Math.PI)
+      ctx.fill()
+      this.count++
+      if(this.count == 10) {
+        this.isShown = false
+      }
+  }
+}
+var tapHandler = new TapHandler()
 socket.on('RECEIVE_GAME_OBJECT',(gameObjectJson)=>{
     var gameObject = JSON.parse(gameObjectJson)
     gameObject.x*=(canvas.width/gameObject.w)
@@ -75,6 +101,7 @@ function draw() {
     currentPlayer.draw(ctx)
     currentPlayer.move()
     ctx.fill()
+    tapHandler.draw(ctx)
     if(currentPlayer.sx != 0 || currentPlayer.sy!=0) {
        socket.emit('SEND_GAME_OBJECT',JSON.stringify(currentPlayer))
     }
@@ -88,6 +115,7 @@ function draw() {
 canvas.onmousedown = function(event) {
     console.log(event)
    currentPlayer.setSpeed(event.pageX,event.pageY)
+   tapHandler.tap(event.pageX-event.pageX%10,event.pageY-event.pageY%10)
 }
 socket.on('hello',(data)=>{
     console.log("greeted by server")
